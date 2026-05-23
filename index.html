@@ -2,587 +2,846 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ HONORS GAUNTLET: LITERARY ARENA ⚡</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literary Legends: The English III Exam</title>
     <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff007f;
+            --bg-dark: #0f0f1a;
+            --panel-bg: rgba(20, 20, 35, 0.9);
+            --text-light: #e0e0ff;
+            --damage: #ff3333;
+            --heal: #33ff33;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
             user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            min-height: 100vh;
-            background: radial-gradient(circle at 10% 20%, #0b0e1a, #010101);
-            font-family: 'Orbitron', 'Poppins', 'Segoe UI', monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
             display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #canvas-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            background: rgba(15, 15, 26, 0.95);
         }
 
-        /* MAIN GAME PANEL */
-        .game-container {
-            max-width: 1350px;
-            width: 100%;
-            background: rgba(0, 5, 15, 0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 2.5rem;
-            border: 2px solid #0ff8;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.05);
-            padding: 1.5rem;
-            transition: all 0.2s;
-        }
-
-        /* MODE SELECTOR */
-        .mode-arena {
+        .screen.active {
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 25px;
         }
-        .mode-btn {
-            background: #111c2c;
-            border: 1px solid cyan;
-            padding: 10px 24px;
-            border-radius: 60px;
-            font-weight: bold;
-            font-family: monospace;
-            color: #bbf5ff;
+
+        /* Typography */
+        h1 {
+            font-size: 4rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px var(--primary);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            font-size: 1.2rem;
+            text-align: center;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 15px 40px;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: 0.1s linear;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 20px var(--primary);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: #fff;
+            box-shadow: 0 0 20px var(--secondary);
+        }
+
+        /* Battle UI */
+        #battle-screen {
+            justify-content: space-between;
+            background: transparent;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .entity-card {
+            background: var(--panel-bg);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.1s;
+        }
+
+        .entity-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .mode-btn.active {
-            background: cyan;
-            color: #000;
-            box-shadow: 0 0 15px cyan;
-            border-color: white;
-        }
-        .mode-btn:hover {
-            transform: scale(0.96);
-            background: #2f5f8f;
+
+        #boss-name { color: var(--secondary); }
+        #player-name { color: var(--primary); }
+
+        .health-bar-container {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #555;
+            position: relative;
         }
 
-        /* STATS PANEL */
-        .stats-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            background: #030c1ae0;
-            padding: 0.8rem 1.5rem;
-            border-radius: 60px;
-            margin-bottom: 20px;
-            border: 1px solid #0ff;
-        }
-        .stat {
-            background: #00000099;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            color: #e0f2fe;
-        }
-        .score { color: #f5cb5c; font-size: 1.8rem; font-weight: 900; }
-        .lives { color: #ff7b72; font-size: 1.5rem; }
-        .powerup-badge {
-            background: #2a0f3b;
-            padding: 5px 12px;
-            border-radius: 30px;
-            gap: 15px;
-        }
-        .powerup-btn {
-            background: #3f2b4e;
-            border: none;
-            color: gold;
-            padding: 5px 12px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.05s linear;
-        }
-        .powerup-btn:active { transform: scale(0.95);}
-        .timer-zone {
-            margin: 15px 0 12px;
-            height: 14px;
-            background: #1e2a3a;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .timer-fill {
-            width: 100%;
+        .health-bar {
             height: 100%;
-            background: linear-gradient(90deg, #0ff, #f0f);
-            transition: width 0.03s linear;
+            width: 100%;
+            background: linear-gradient(90deg, #ff0055, #ff0000);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .question-card {
-            background: rgba(8, 18, 32, 0.9);
-            border-radius: 2rem;
-            padding: 1.5rem;
-            margin: 15px 0;
-            border-left: 8px solid cyan;
+
+        .player-health .health-bar {
+            background: linear-gradient(90deg, #00ffcc, #00b38f);
         }
-        .passage-box {
-            background: #071b2b;
-            padding: 1rem;
-            border-radius: 1rem;
-            font-family: 'Georgia', serif;
-            font-size: 1rem;
-            margin-bottom: 1.2rem;
-            border-left: 4px solid #ffaa44;
-            font-style: italic;
+
+        .hp-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px black;
         }
+
+        .arena {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .boss-sprite {
+            font-size: 100px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px var(--secondary));
+            transition: all 0.3s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px) scale(1.05); }
+            100% { transform: translateY(0px); }
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+
+        /* Action Menu */
+        .action-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            padding: 20px;
+            background: var(--panel-bg);
+            border-top: 2px solid var(--primary);
+        }
+
+        .action-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn span {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: black;
+            transform: translateY(-2px);
+        }
+        .action-btn:hover span { color: #333; }
+
+        /* Modal / Question Screen */
+        #question-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            padding: 40px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-box {
+            background: #1a1a2e;
+            border: 2px solid var(--primary);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+
         .question-text {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #fff5e0;
-            margin-bottom: 1.4rem;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            line-height: 1.4;
         }
+
         .options-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-            gap: 16px;
-            margin: 20px 0;
-        }
-        .option-btn {
-            background: #0a1428;
-            border: 2px solid #2c6c9e;
-            padding: 12px 12px;
-            border-radius: 70px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #eef4ff;
-            cursor: pointer;
-            transition: 0.07s linear;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .option-btn:hover:not(:disabled) {
-            background: #1f4970;
-            border-color: cyan;
-            transform: scale(0.97);
-        }
-        .correct-flash {
-            background: #00a86b !important;
-            border-color: gold !important;
-            animation: pulseGreen 0.2s ease;
-        }
-        .wrong-shake {
-            animation: shake 0.2s ease-in-out 0s 2;
-            background: #aa2e2e;
-        }
-        @keyframes shake {
-            0% { transform: translateX(0);}
-            25% { transform: translateX(-6px);}
-            75% { transform: translateX(6px);}
-            100% { transform: translateX(0);}
-        }
-        @keyframes pulseGreen {
-            0% { box-shadow: 0 0 0 0 #0f0; }
-            100% { box-shadow: 0 0 0 8px transparent; }
-        }
-        .next-area {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        .next-btn, .restart-btn {
-            background: linear-gradient(145deg, #1f3f5f, #071a2a);
-            border: 1px solid cyan;
-            padding: 10px 28px;
-            font-weight: bold;
-            border-radius: 40px;
-            color: cyan;
-            cursor: pointer;
-        }
-        .restart-btn {
-            background: #2f1e2e;
-            color: #ffaa88;
-        }
-        .footer-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        .particle {
-            position: fixed;
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #555;
+            color: white;
+            padding: 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .option-btn:hover {
+            background: rgba(0, 255, 204, 0.2);
+            border-color: var(--primary);
+        }
+
+        .option-btn.correct { background: #00cc44; border-color: #00ff55; color: black; }
+        .option-btn.wrong { background: #cc0000; border-color: #ff3333; color: white; }
+
+        /* Floating text effects */
+        .floating-text {
+            position: absolute;
+            font-size: 2rem;
+            font-weight: bold;
             pointer-events: none;
-            background: radial-gradient(circle, gold, orange);
-            border-radius: 50%;
-            animation: particlePop 0.6s forwards;
-            z-index: 999;
+            animation: floatUp 1.5s ease-out forwards;
+            z-index: 100;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
         }
-        @keyframes particlePop {
-            0% { transform: scale(0.2) translateY(0); opacity: 1;}
-            100% { transform: scale(1.2) translateY(-60px); opacity: 0;}
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { transform: translateY(-50px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1); }
         }
-        @media (max-width: 700px) {
-            .question-text { font-size: 1.2rem; }
-            .stats-panel { font-size: 0.8rem; }
+
+        .stat-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 20px;
+            background: #000;
+            font-size: 1.2rem;
+            color: var(--primary);
+            border-bottom: 1px solid #333;
         }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameRoot">
-    <div class="mode-arena" id="modeSelector">
-        <button data-mode="classic" class="mode-btn active">🎮 CLASSIC (timed/lives)</button>
-        <button data-mode="endurance" class="mode-btn">🧘 ENDURANCE (no timer, more lives)</button>
-        <button data-mode="blitz" class="mode-btn">⚡ BLITZ (10s, double points)</button>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div id="game-container">
+        
+        <!-- MAIN MENU -->
+        <div id="screen-menu" class="screen active">
+            <h1>Literary Legends</h1>
+            <h2>Honors English III Exam</h2>
+            <p>Master the Major Works, Literary Periods, Vocabulary, and Grammar to defeat the Guardians of Literature.</p>
+            <br>
+            <button class="btn" onclick="game.startGame()">Start Exam Battle</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('screen-tutorial').classList.add('active'); document.getElementById('screen-menu').classList.remove('active');">How to Play</button>
+        </div>
+
+        <!-- TUTORIAL -->
+        <div id="screen-tutorial" class="screen">
+            <h2>How to Play</h2>
+            <p style="text-align: left; font-size: 1.1rem;">
+                ⚔️ <strong>Choose Your Attack:</strong> Select an attack based on the study guide category. <br><br>
+                📖 <strong>Major Works Strike:</strong> High damage. Questions on Gatsby, Crucible, etc.<br>
+                🎭 <strong>Literary Terms:</strong> Medium damage. Questions on devices and periods.<br>
+                🗣️ <strong>Vocab Barrage:</strong> Quick timer. Tests Sadlier-Oxford vocabulary.<br>
+                📝 <strong>Grammar Shield:</strong> Heals you. Tests punctuation and structure.<br><br>
+                ⏱️ <strong>Answer Quickly!</strong> Faster answers deal more damage.<br>
+                ☠️ <strong>Missed Questions:</strong> The Boss will counter-attack!
+            </p>
+            <button class="btn" onclick="document.getElementById('screen-menu').classList.add('active'); document.getElementById('screen-tutorial').classList.remove('active');">Back</button>
+        </div>
+
+        <!-- BATTLE SCREEN -->
+        <div id="screen-battle" class="screen" style="padding:0;">
+            <div class="stat-bar">
+                <span id="score-display">Score: 0</span>
+                <span id="streak-display">Streak: x1</span>
+            </div>
+            
+            <div class="hud">
+                <div class="entity-card player-health">
+                    <div class="entity-name" id="player-name">Student Scholar</div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" id="player-hp-bar"></div>
+                        <span class="hp-text" id="player-hp-text">100/100</span>
+                    </div>
+                </div>
+
+                <div class="entity-card">
+                    <div class="entity-name" id="boss-name">The Puritan</div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" id="boss-hp-bar"></div>
+                        <span class="hp-text" id="boss-hp-text">100/100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arena">
+                <div id="boss-sprite" class="boss-sprite">📜</div>
+            </div>
+
+            <div class="action-menu">
+                <button class="action-btn" onclick="game.triggerQuestion('works')">
+                    Major Works Strike
+                    <span>(High DMG | Deep Knowledge)</span>
+                </button>
+                <button class="action-btn" onclick="game.triggerQuestion('terms')">
+                    Literary Terms Array
+                    <span>(Med DMG | Devices & Periods)</span>
+                </button>
+                <button class="action-btn" onclick="game.triggerQuestion('vocab')">
+                    Vocab Barrage
+                    <span>(Fast DMG | Sadlier-Oxford)</span>
+                </button>
+                <button class="action-btn" onclick="game.triggerQuestion('grammar')" style="border-color: #33ff33;">
+                    Grammar Shield
+                    <span style="color: #33ff33;">(Heals Player | Syntax check)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUESTION MODAL -->
+        <div id="question-modal">
+            <div class="question-box">
+                <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+                <h3 id="category-title" style="color:var(--secondary); text-transform:uppercase; margin-top:0;">Category</h3>
+                <div class="question-text" id="q-text">Question goes here?</div>
+                <div class="options-grid" id="q-options">
+                    <!-- Options populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME OVER / VICTORY -->
+        <div id="screen-end" class="screen">
+            <h1 id="end-title">Game Over</h1>
+            <h2 id="end-score">Final Score: 0</h2>
+            <p id="end-msg">The literature was too dense this time...</p>
+            <br>
+            <button class="btn" onclick="location.reload()">Study & Retry</button>
+        </div>
+
     </div>
-    <div class="stats-panel">
-        <div class="stat">🏆 SCORE <span class="score" id="scoreValue">0</span></div>
-        <div class="stat">❤️ LIVES <span class="lives" id="livesValue">3</span></div>
-        <div class="stat">🔥 STREAK <span id="streakValue">0</span></div>
-        <div class="stat">📖 Q<span id="qIndex">0</span>/<span id="qTotal">0</span></div>
-        <div class="powerup-badge">✨ POWER-UPS <button id="hintBtn" class="powerup-btn">💡 HINT (<span id="hintCount">2</span>)</button>
-        <button id="skipBtn" class="powerup-btn">⏩ SKIP (<span id="skipCount">1</span>)</button></div>
-    </div>
-    <div class="timer-zone" id="timerZone"><div class="timer-fill" id="timerFill" style="width: 100%"></div></div>
-    <div id="questionContainer" class="question-card">
-        <div id="passageDisplay" class="passage-box" style="display: none;"></div>
-        <div id="questionText" class="question-text">⚔️ Choose your mode & conquer the literary gauntlet ⚔️</div>
-        <div id="optionsArea" class="options-grid"></div>
-        <div id="feedbackMsg" style="font-size: 0.9rem; margin-top: 8px; padding: 8px; text-align: center;"></div>
-        <div class="next-area" id="nextButtonArea" style="display: none;"><button class="next-btn" id="nextBtn">➡️ NEXT TRIAL</button></div>
-    </div>
-    <div class="footer-controls"><button class="restart-btn" id="restartGameBtn">🔄 RESTART GAUNTLET</button></div>
-</div>
 
 <script>
-    // ---------- MASSIVE QUESTION BANK (FULL HONORS ENGLISH III) ----------
-    const MASTER_QUESTIONS = [];
-    function addQ(question, options, correctIdx, passage = null, explanation = "") {
-        MASTER_QUESTIONS.push({ question, options, correctIdx, passage, explanation });
+/**
+ * PARTICLE BACKGROUND SYSTEM
+ */
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+const chars = ['A', 'E', 'I', 'O', 'U', '"', '?', '!', ',', '.', '§', '¶', 'Gatsby', 'Proctor', 'Raven', 'Walden'];
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 15 + 10;
+        this.speedY = Math.random() * 1 + 0.5;
+        this.text = chars[Math.floor(Math.random() * chars.length)];
+        this.opacity = Math.random() * 0.5 + 0.1;
     }
-    // MAJOR WORKS & PERIODS
-    addQ("In 'The Crucible', who leads the accusations while having an affair with John Proctor?", ["Abigail Williams", "Elizabeth Proctor", "Mary Warren", "Rebecca Nurse"], 0, null, "Abigail manipulates Salem.");
-    addQ("Symbol in 'Gatsby' representing hopes & Daisy?", ["Green light", "Valley of ashes", "East Egg", "T.J. Eckleburg"], 0, null, "Green light at Daisy's dock.");
-    addQ("Chris McCandless' alias in 'Into the Wild':", ["Alexander Supertramp", "Jim Gallien", "Wayne Westerberg", "Krakauer"], 0, null, "Alexander Supertramp.");
-    addQ("Who dreams of becoming a doctor in 'Raisin in the Sun'?", ["Beneatha Younger", "Walter Lee", "Lena", "Ruth"], 0, null, "Beneatha wants to be a physician.");
-    addQ("Which period emphasizes emotion, nature, individualism?", ["Romanticism", "Realism", "Modernism", "Puritanism"], 0, null, "Romanticism (1800–1860).");
-    addQ("Literary period focusing on ordinary life & dialect?", ["Realism", "Romanticism", "Colonial", "Modernism"], 0, null, "Realism depicts everyday reality.");
-    addQ("Famous Puritan poet?", ["Anne Bradstreet", "Walt Whitman", "Emily Dickinson", "Edgar Allan Poe"], 0, null, "Anne Bradstreet, colonial poet.");
-    // POETRY
-    addQ("In 'Because I could not stop for Death', Death is personified as?", ["Carriage driver", "Kind suitor", "King", "Ghost"], 1, null, "He kindly stopped for me.");
-    addQ("'Crumbling is not an instant’s Act' suggests?", ["Decay is gradual", "Sudden collapse", "Hope remains", "Nature's fury"], 0, null, "Gradual process of decline.");
-    addQ("'My life closed twice before its close' theme?", ["Loss & parting", "Joy", "Immortality", "Nature"], 0, null, "Losses that feel like death.");
-    addQ("In 'The Raven', the raven perches upon a bust of?", ["Pallas", "Apollo", "Zeus", "Athena"], 0, null, "Pallas Athena, wisdom.");
-    addQ("'Song of Myself' celebrates?", ["Individuality & self", "Despair", "War", "Urban life"], 0, null, "Whitman's celebration of self.");
-    addQ("'Hope is the thing with feathers' compares hope to a?", ["Bird", "Butterfly", "Star", "Tree"], 0, null, "A bird that perches.");
-    // SHORT STORIES
-    addQ("In 'Masque of the Red Death', the clock chime symbolizes?", ["Inevitability of death", "Celebration", "Wealth", "Illusion"], 0, null, "Time running out.");
-    addQ("Narrator in 'The Yellow Wallpaper' suffers from?", ["Postpartum depression", "Consumption", "Amnesia", "PTSD"], 0, null, "Rest cure & oppression.");
-    addQ("'To Build a Fire' main cause of death?", ["Pride & underrating nature", "Wolves", "Falling ice", "Matches"], 0, null, "Arrogance against the wild.");
-    // TRANSCENDENTALISM
-    addQ("Emerson's 'Self-Reliance' urges:", ["Trust thyself", "Follow tradition", "Conformity", "Reject intuition"], 0, null, "Nonconformity & inner voice.");
-    addQ("Thoreau's 'Civil Disobedience' advocates:", ["Disobey unjust laws", "Always obey", "Pay all taxes", "Violent revolt"], 0, null, "Passive resistance.");
-    // FINAL UNIT
-    addQ("'Born of Man and Woman' perspective:", ["A monstrous child", "A mother", "Scientist", "Alien"], 0, null, "Imprisoned creature.");
-    addQ("In 'Story of an Hour', Louise Mallard feels:", ["Liberation", "Grief", "Indifference", "Panic"], 0, null, "Freedom and independence.");
-    addQ("'A Rose for Emily' discovery:", ["Homer Barron's corpse", "Treasure", "Secret marriage", "Poison"], 0, null, "Skeleton in the bed.");
-    addQ("'Mirror Image' theme:", ["Identity & memory", "Alien invasion", "Revolution", "Poverty"], 0, null, "Brain transplant identity crisis.");
-    addQ("'Standard Loneliness Package' allows people to:", ["Outsource emotions", "Fly", "Telepathy", "Immortality"], 0, null, "Hire others to feel pain.");
-    // TERMS
-    addQ("Hint of future events:", ["Foreshadowing", "Flashback", "Irony", "Allusion"], 0, null, "Foreshadowing builds suspense.");
-    addQ("'The wind whispered' is:", ["Personification", "Simile", "Metaphor", "Alliteration"], 0, null, "Human traits to nature.");
-    addQ("Character who changes internally:", ["Dynamic", "Static", "Flat", "Stock"], 0, null, "Dynamic character evolves.");
-    addQ("Author's attitude toward subject:", ["Tone", "Mood", "Theme", "Voice"], 0, null, "Tone reflects feeling.");
-    // VOCAB
-    addQ("Synonym for ASSUAGE:", ["Conciliate", "Provoke", "Worsen", "Ignore"], 0, null, "Assuage = pacify, conciliate.");
-    addQ("Best synonym for HACKNEYED:", ["Trite", "Fresh", "Original", "Complex"], 0, null, "Overused, cliché.");
-    addQ("HIATUS means:", ["A gap or break", "Continuation", "Unity", "Conclusion"], 0, null, "Pause in activity.");
-    addQ("TRANSCEND means:", ["Go beyond limits", "Stay within", "Descend", "Copy"], 0, null, "Exceed, surpass.");
-    // GRAMMAR
-    addQ("Correct punctuation: 'Its a beautiful day lets go'", ["It's a beautiful day; let's go.", "Its a beautiful day, lets go.", "It's a beautiful day lets go.", "Its' a beautiful day; let's go."], 0, null, "Semicolon + contraction.");
-    addQ("Subject-verb agreement: 'The group of students ____ studying.'", ["is", "are", "am", "be"], 0, null, "Collective noun singular.");
-    addQ("Correct use of colon:", ["I need: apples, milk.", "I need the following: apples, milk.", "I need apples: milk.", "I need, apples milk."], 1, null, "Complete sentence before colon.");
-    // COLD READS
-    addQ("Passage: 'free, free, free!' - The Story of an Hour inference:", ["Liberation feeling", "Deep mourning", "Anger", "Confusion"], 0, "She whispered 'free' after husband's death.", "Mrs. Mallard envisions independence.");
-    addQ("'The Raven' allusion to Pallas suggests:", ["Seeking wisdom", "Love", "Death", "War"], 0, null, "Wisdom goddess, ironic torment.");
-    addQ("'The Yellow Wallpaper' woman behind pattern symbolizes:", ["Desire for freedom", "Madness is fake", "Domestic bliss", "Revenge"], 0, null, "Narrator's trapped self.");
-    // extra
-    addQ("Author of 'The Raven' and 'Masque'?", ["Edgar Allan Poe", "Hawthorne", "Melville", "Dickinson"], 0, null, "Poe, master of Gothic.");
-    addQ("Modernism feature:", ["Stream of consciousness", "Heroic couplets", "Pastoral", "Didactic"], 0, null, "Fragmentation after WWI.");
-    addQ("'A Rose for Emily' rose symbolizes:", ["Love & pity", "Death", "Anger", "Wealth"], 0, null, "Respect and sorrow.");
-    addQ("Who wrote 'Nature' and 'Self-Reliance'?", ["Ralph Waldo Emerson", "Thoreau", "Whitman", "Longfellow"], 0, null, "Emerson, transcendentalist.");
-    addQ("Dramatic irony definition:", ["Audience knows more", "Sarcasm", "Unexpected twist", "Understatement"], 0, null, "Character unaware, audience aware.");
-    // total > 55 unique -> great coverage
-    console.log("Bank size:", MASTER_QUESTIONS.length);
-    
-    // ---------- GAME STATE & MODES ----------
-    let currentGameQuestions = [];
-    let currentIndex = 0, playerScore = 0, playerLives = 3, streak = 0;
-    let activeTimer = null, answeringLock = false, gameActive = true;
-    let currentMode = "classic";   // classic, endurance, blitz
-    let timeLimit = 16;
-    let currentTimeLeft = 16;
-    let hintsRemaining = 2;
-    let skipsRemaining = 1;
-    
-    // DOM elements
-    const questionDiv = document.getElementById("questionText");
-    const optionsDiv = document.getElementById("optionsArea");
-    const passageDiv = document.getElementById("passageDisplay");
-    const feedbackSpan = document.getElementById("feedbackMsg");
-    const nextArea = document.getElementById("nextButtonArea");
-    const scoreSpan = document.getElementById("scoreValue");
-    const livesSpan = document.getElementById("livesValue");
-    const streakSpan = document.getElementById("streakValue");
-    const qIndexSpan = document.getElementById("qIndex");
-    const qTotalSpan = document.getElementById("qTotal");
-    const timerFill = document.getElementById("timerFill");
-    const timerZoneDiv = document.getElementById("timerZone");
-    const hintCountSpan = document.getElementById("hintCount");
-    const skipCountSpan = document.getElementById("skipCount");
-    const hintBtn = document.getElementById("hintBtn");
-    const skipBtn = document.getElementById("skipBtn");
-    
-    function updateUI() {
-        scoreSpan.innerText = playerScore;
-        livesSpan.innerText = playerLives;
-        streakSpan.innerText = streak;
-        qIndexSpan.innerText = currentIndex + 1;
-        qTotalSpan.innerText = currentGameQuestions.length;
-        hintCountSpan.innerText = hintsRemaining;
-        skipCountSpan.innerText = skipsRemaining;
+    update() {
+        this.y -= this.speedY;
+        if (this.y < -50) {
+            this.y = canvas.height + 50;
+            this.x = Math.random() * canvas.width;
+        }
     }
-    
-    function stopTimer() { if (activeTimer) clearInterval(activeTimer); activeTimer = null; }
-    
-    function startTimer() {
-        if (!gameActive) return;
-        if (currentMode === "endurance") { timerZoneDiv.style.display = "none"; return; }
-        else timerZoneDiv.style.display = "block";
-        if (activeTimer) stopTimer();
-        let maxTime = (currentMode === "blitz") ? 10 : 16;
-        timeLimit = maxTime;
-        currentTimeLeft = timeLimit;
-        timerFill.style.width = "100%";
-        activeTimer = setInterval(() => {
-            if (!gameActive || answeringLock) return;
-            if (currentTimeLeft <= 0) {
-                if (!answeringLock) handleTimeout();
-            } else {
-                currentTimeLeft--;
-                let percent = (currentTimeLeft / timeLimit) * 100;
-                timerFill.style.width = `${Math.max(0, percent)}%`;
-                timerFill.style.background = currentTimeLeft <= 3 ? "#ff5555" : "linear-gradient(90deg, #0ff, #f0f)";
+    draw() {
+        ctx.fillStyle = `rgba(0, 255, 204, ${this.opacity})`;
+        ctx.font = `${this.size}px monospace`;
+        ctx.fillText(this.text, this.x, this.y);
+    }
+}
+
+function initParticles() {
+    for (let i = 0; i < 50; i++) particles.push(new Particle());
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+}
+initParticles();
+animateParticles();
+
+
+/**
+ * QUESTION DATABASE based on Honors English III Study Guide
+ */
+const questionsData = {
+    works: [
+        { q: "In 'The Crucible', what historical event is the play serving as an allegory for?", o: ["The Holocaust", "McCarthyism / The Red Scare", "The Civil War", "The Salem Witch Trials of 1950"], a: 1 },
+        { q: "What does the green light at the end of Daisy's dock symbolize in 'The Great Gatsby'?", o: ["Greed and money", "Envy", "Gatsby's unreachable hopes and dreams", "The passage of time"], a: 2 },
+        { q: "Who is the author of 'Into the Wild'?", o: ["Jon Krakauer", "Henry David Thoreau", "F. Scott Fitzgerald", "Arthur Miller"], a: 0 },
+        { q: "In 'A Raisin in the Sun', what does Mama's plant symbolize?", o: ["Her dead husband", "Her care and dream for a family home", "Financial wealth", "Assimilation"], a: 1 },
+        { q: "Which Romantic author wrote 'The Raven'?", o: ["Emily Dickinson", "Walt Whitman", "Edgar Allan Poe", "Henry Wadsworth Longfellow"], a: 2 },
+        { q: "In 'To Build a Fire', what literary period is best represented by the unforgiving, indifferent nature?", o: ["Romanticism", "Realism/Naturalism", "Modernism", "Colonialism"], a: 1 },
+        { q: "Which short story features a protagonist whose husband confines her to a room, leading to her mental breakdown?", o: ["The Story of an Hour", "A Rose for Emily", "The Yellow Wallpaper", "Born of Man and Woman"], a: 2 },
+        { q: "Which author famously wrote 'Because I could not stop for Death'?", o: ["Walt Whitman", "Emily Dickinson", "Kate Chopin", "William Faulkner"], a: 1 },
+        { q: "In 'A Rose for Emily', what is found on the pillow next to Homer Barron's skeleton?", o: ["A rose", "A suicide note", "A long strand of iron-gray hair", "A bottle of arsenic"], a: 2 },
+        { q: "Which essay by Thoreau explores the idea of peaceful resistance against unjust laws?", o: ["Nature", "Self-Reliance", "Walden", "Civil Disobedience"], a: 3 }
+    ],
+    terms: [
+        { q: "A contrast between expectation and reality is known as:", o: ["Foreshadowing", "Irony", "Tone", "Allusion"], a: 1 },
+        { q: "Giving human qualities to non-human things is:", o: ["Metaphor", "Simile", "Personification", "Imagery"], a: 2 },
+        { q: "Which literary period focuses heavily on emotion, individualism, and nature over reason?", o: ["Realism", "Modernism", "Romanticism", "Puritanism"], a: 2 },
+        { q: "A direct comparison between two unlike things WITHOUT using 'like' or 'as' is a:", o: ["Simile", "Metaphor", "Allusion", "Symbol"], a: 1 },
+        { q: "A character who undergoes significant internal change throughout a story is a:", o: ["Static Character", "Dynamic Character", "Flat Character", "Foil"], a: 1 },
+        { q: "The Puritans favored a writing style that was simple and direct. This is known as:", o: ["Flowery Style", "Gothic Style", "Plain Style", "Modernist Style"], a: 2 },
+        { q: "When a writer references a well-known historical event, person, or piece of art, it is an:", o: ["Allusion", "Illusion", "Analogy", "Allegory"], a: 0 },
+        { q: "Which literary period, emerging post-WWI, features fragmentation, loss, and disjointed timelines?", o: ["Realism", "Romanticism", "Colonialism", "Modernism"], a: 3 },
+        { q: "The repetition of initial consonant sounds (e.g., 'weak and weary') is called:", o: ["Assonance", "Alliteration", "Rhyme", "Meter"], a: 1 },
+        { q: "The author's attitude toward their subject is known as:", o: ["Mood", "Theme", "Voice", "Tone"], a: 3 }
+    ],
+    vocab: [
+        { q: "Choose the correct synonym for 'assuage':", o: ["Aggravate", "Pacify / Alleviate", "Ignore", "Condemn"], a: 1 },
+        { q: "Choose the correct synonym for 'approbation':", o: ["Disapproval", "Approval / Commendation", "Hesitation", "Fear"], a: 1 },
+        { q: "If something is 'hackneyed', it is:", o: ["Original", "Dangerous", "Overused / Cliche", "Expensive"], a: 2 },
+        { q: "What does 'hiatus' mean?", o: ["A continuous flow", "A mountain peak", "A break or interruption", "A sudden storm"], a: 2 },
+        { q: "An indirect, usually derogatory hint or implication is an:", o: ["Innuendo", "Approbation", "Epitome", "Ascribe"], a: 0 },
+        { q: "Actions that are deserving of praise or reward are:", o: ["Slovenly", "Meritorious", "Nebulous", "Fractious"], a: 1 },
+        { q: "To go beyond the limits of; to overstep or exceed is to:", o: ["Extricate", "Transcend", "Commiserate", "Enjoin"], a: 1 },
+        { q: "To 'elicit' means to:", o: ["Hide away", "Draw forth or bring out", "Break apart", "Complain bitterly"], a: 1 },
+        { q: "Which word means to express sorrow or pity for; sympathize with?", o: ["Commiserate", "Acculturation", "Ascribe", "Cajole"], a: 0 },
+        { q: "A 'coalition' is best defined as:", o: ["A deep pit", "An alliance or union", "A sudden disease", "A harsh punishment"], a: 1 }
+    ],
+    grammar: [
+        { q: "Which sentence avoids being a run-on?", o: ["I like English I study every night.", "I like English, I study every night.", "I like English; I study every night.", "I like English and I study every night no breaks."], a: 2 },
+        { q: "Which uses a semicolon correctly?", o: ["Because I studied; I passed.", "I passed the test; and I was happy.", "Gatsby loved Daisy; however, she was married.", "The characters include: Proctor; Abigail; and Parris."], a: 2 },
+        { q: "Identify the sentence with correct subject-verb agreement:", o: ["The group of students are reading.", "The group of students is reading.", "The students is reading.", "A group of students have read."], a: 1 },
+        { q: "Which of the following is a sentence fragment?", o: ["She ran.", "Because he was tired after the long exam.", "Stop.", "The book was dense."], a: 1 },
+        { q: "Which correctly uses commonly confused words?", o: ["There going to their house over they're.", "They're going to there house over their.", "They're going to their house over there.", "Their going to they're house over there."], a: 2 },
+        { q: "Which sentence avoids a comma splice?", o: ["The raven tapped, Poe answered.", "The raven tapped, so Poe answered.", "The raven tapped, however Poe answered.", "The raven tapped, and then, Poe answered, quickly."], a: 1 },
+        { q: "An independent clause...", o: ["Cannot stand alone.", "Requires a conjunction.", "Expresses a complete thought and can stand alone.", "Functions only as an adjective."], a: 2 },
+        { q: "Choose the correct parts of speech: In 'He ran quickly', 'quickly' is an:", o: ["Adjective", "Adverb", "Noun", "Preposition"], a: 1 },
+        { q: "Which punctuation mark is used to introduce a list or emphasize a point?", o: ["Semicolon", "Comma", "Colon", "Hyphen"], a: 2 },
+        { q: "Which conjunction correctly joins these independent clauses: 'It rained heavily. We stayed inside.'", o: ["Because", "Therefore", "So", "However"], a: 2 }
+    ]
+};
+
+/**
+ * GAME ENGINE
+ */
+class EnglishGame {
+    constructor() {
+        this.maxPlayerHP = 100;
+        this.playerHP = this.maxPlayerHP;
+        this.score = 0;
+        this.streak = 1;
+        
+        this.bosses = [
+            { name: "The Puritan (Early)", hp: 100, maxHp: 100, sprite: "⛪" },
+            { name: "The Raven (Romantic)", hp: 150, maxHp: 150, sprite: "🐦‍⬛" },
+            { name: "The Machine (Realist)", hp: 200, maxHp: 200, sprite: "⚙️" },
+            { name: "The Fragment (Modern)", hp: 250, maxHp: 250, sprite: "🧩" }
+        ];
+        this.currentBossIndex = 0;
+
+        this.currentCategory = null;
+        this.currentQuestion = null;
+        this.timer = null;
+        this.timeLeft = 100;
+
+        // Shuffle questions
+        for (let cat in questionsData) {
+            questionsData[cat].sort(() => Math.random() - 0.5);
+        }
+        this.qIndexes = { works: 0, terms: 0, vocab: 0, grammar: 0 };
+    }
+
+    startGame() {
+        document.getElementById('screen-menu').classList.remove('active');
+        document.getElementById('screen-battle').classList.add('active');
+        this.updateHUD();
+        this.loadBoss();
+    }
+
+    loadBoss() {
+        if (this.currentBossIndex >= this.bosses.length) {
+            this.triggerVictory();
+            return;
+        }
+        const boss = this.bosses[this.currentBossIndex];
+        document.getElementById('boss-name').innerText = boss.name;
+        document.getElementById('boss-sprite').innerText = boss.sprite;
+        this.updateHUD();
+        this.createFloatingText("Boss Appeared!", '#ff007f');
+    }
+
+    updateHUD() {
+        // Player
+        const pPct = Math.max(0, (this.playerHP / this.maxPlayerHP) * 100);
+        document.getElementById('player-hp-bar').style.width = pPct + '%';
+        document.getElementById('player-hp-text').innerText = `${Math.floor(this.playerHP)}/${this.maxPlayerHP}`;
+
+        // Boss
+        const boss = this.bosses[this.currentBossIndex];
+        if (boss) {
+            const bPct = Math.max(0, (boss.hp / boss.maxHp) * 100);
+            document.getElementById('boss-hp-bar').style.width = bPct + '%';
+            document.getElementById('boss-hp-text').innerText = `${Math.floor(boss.hp)}/${boss.maxHp}`;
+        }
+
+        document.getElementById('score-display').innerText = `Score: ${this.score}`;
+        document.getElementById('streak-display').innerText = `Streak: x${this.streak}`;
+    }
+
+    triggerQuestion(category) {
+        this.currentCategory = category;
+        const qList = questionsData[category];
+        let idx = this.qIndexes[category];
+        
+        if (idx >= qList.length) {
+            // reset list if we run out
+            questionsData[category].sort(() => Math.random() - 0.5);
+            this.qIndexes[category] = 0;
+            idx = 0;
+        }
+
+        this.currentQuestion = qList[idx];
+        this.qIndexes[category]++;
+
+        // UI Setup
+        const modal = document.getElementById('question-modal');
+        const qText = document.getElementById('q-text');
+        const qOptions = document.getElementById('q-options');
+        const catTitle = document.getElementById('category-title');
+
+        const catNames = {
+            works: "Major Works Strike",
+            terms: "Literary Terms Array",
+            vocab: "Vocab Barrage",
+            grammar: "Grammar Shield"
+        };
+        catTitle.innerText = catNames[category];
+        qText.innerText = this.currentQuestion.q;
+        
+        qOptions.innerHTML = '';
+        this.currentQuestion.o.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => this.answerQuestion(i, btn);
+            qOptions.appendChild(btn);
+        });
+
+        modal.style.display = 'flex';
+        
+        // Timer
+        this.timeLeft = 100;
+        document.getElementById('timer-fill').style.width = '100%';
+        clearInterval(this.timer);
+        this.timer = setInterval(() => {
+            this.timeLeft -= category === 'vocab' ? 1.5 : 0.8; // Vocab goes faster
+            document.getElementById('timer-fill').style.width = Math.max(0, this.timeLeft) + '%';
+            
+            if (this.timeLeft <= 0) {
+                clearInterval(this.timer);
+                this.handleTimeout();
             }
+        }, 100);
+    }
+
+    answerQuestion(selectedIndex, btnElement) {
+        clearInterval(this.timer);
+        
+        const isCorrect = (selectedIndex === this.currentQuestion.a);
+        const options = document.querySelectorAll('.option-btn');
+        
+        options[this.currentQuestion.a].classList.add('correct');
+        if (!isCorrect) {
+            btnElement.classList.add('wrong');
+        }
+
+        // Disable clicks
+        options.forEach(b => b.style.pointerEvents = 'none');
+
+        setTimeout(() => {
+            document.getElementById('question-modal').style.display = 'none';
+            this.resolveTurn(isCorrect);
         }, 1000);
     }
-    
-    function handleTimeout() {
-        if (answeringLock) return;
-        answeringLock = true;
-        stopTimer();
-        playerLives--;
-        streak = 0;
-        updateUI();
-        const q = currentGameQuestions[currentIndex];
-        feedbackSpan.innerHTML = `⏰ TIME'S UP! Correct: ${q.options[q.correctIdx]} — ${q.explanation || "Review"}`;
-        highlightCorrectAnswer(true);
-        if (playerLives <= 0) endGame();
-        else showNextButton();
+
+    handleTimeout() {
+        const options = document.querySelectorAll('.option-btn');
+        options.forEach(b => b.style.pointerEvents = 'none');
+        options[this.currentQuestion.a].classList.add('correct');
+        
+        setTimeout(() => {
+            document.getElementById('question-modal').style.display = 'none';
+            this.resolveTurn(false, true);
+        }, 1000);
     }
-    
-    function highlightCorrectAnswer(disableAll = true) {
-        const btns = document.querySelectorAll(".option-btn");
-        const correct = currentGameQuestions[currentIndex].correctIdx;
-        btns.forEach((btn, idx) => {
-            if (idx === correct) btn.classList.add("correct-flash");
-            if (disableAll) btn.disabled = true;
-        });
-    }
-    
-    function endGame() {
-        gameActive = false;
-        answeringLock = true;
-        stopTimer();
-        feedbackSpan.innerHTML = `💀 GAME OVER 💀 Final Score: ${playerScore}. Restart to master Honors English III!`;
-        feedbackSpan.style.color = "#ff8888";
-        nextArea.style.display = "none";
-        optionsDiv.innerHTML = '<div style="color:#ffb347; text-align:center;">🏁 Gauntlet over — restart for another run 🏁</div>';
-    }
-    
-    function showNextButton() { nextArea.style.display = "flex"; }
-    
-    function createParticles(x, y) {
-        for (let i=0;i<12;i++) {
-            let particle = document.createElement("div");
-            particle.className = "particle";
-            particle.style.left = (x + (Math.random() - 0.5)*40) + "px";
-            particle.style.top = (y + (Math.random() - 0.5)*40) + "px";
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 600);
-        }
-    }
-    
-    function handleAnswer(selectedIdx) {
-        if (answeringLock || !gameActive) return;
-        answeringLock = true;
-        stopTimer();
-        const q = currentGameQuestions[currentIndex];
-        const isCorrect = (selectedIdx === q.correctIdx);
-        const btns = document.querySelectorAll(".option-btn");
+
+    resolveTurn(isCorrect, isTimeout = false) {
+        const boss = this.bosses[this.currentBossIndex];
+        
         if (isCorrect) {
-            let basePoints = (currentMode === "blitz") ? 200 : 100;
-            let streakBonus = streak * 15;
-            let totalPoints = basePoints + streakBonus;
-            playerScore += totalPoints;
-            streak++;
-            feedbackSpan.innerHTML = `✅ CORRECT! +${totalPoints} (streak ${streak}) ${q.explanation ? "📖 " + q.explanation : ""}`;
-            feedbackSpan.style.color = "#b6ffb0";
-            btns[selectedIdx].classList.add("correct-flash");
-            const rect = btns[selectedIdx].getBoundingClientRect();
-            createParticles(rect.left + rect.width/2, rect.top + rect.height/2);
-        } else {
-            playerLives--;
-            streak = 0;
-            feedbackSpan.innerHTML = `❌ WRONG! Correct: ${q.options[q.correctIdx]}. ${q.explanation || "Study more!"}`;
-            feedbackSpan.style.color = "#ffb090";
-            btns[selectedIdx].classList.add("wrong-shake");
-            setTimeout(() => btns[selectedIdx].classList.remove("wrong-shake"), 300);
-            if (playerLives <= 0) { updateUI(); endGame(); return; }
-        }
-        updateUI();
-        highlightCorrectAnswer(true);
-        if (gameActive && playerLives > 0) showNextButton();
-        else if (playerLives <= 0) endGame();
-    }
-    
-    function useHint() {
-        if (!gameActive || answeringLock) return;
-        if (hintsRemaining <= 0) { feedbackSpan.innerHTML = "⚠️ No hints left! ⚠️"; return; }
-        const q = currentGameQuestions[currentIndex];
-        const correct = q.correctIdx;
-        const wrongIndices = [0,1,2,3].filter(i => i !== correct);
-        const toDisable = wrongIndices.slice(0, 1);
-        const btns = document.querySelectorAll(".option-btn");
-        toDisable.forEach(idx => {
-            if(btns[idx]) btns[idx].style.opacity = "0.5";
-            btns[idx].disabled = true;
-        });
-        hintsRemaining--;
-        updateUI();
-        feedbackSpan.innerHTML = "💡 Hint used: one wrong answer eliminated!";
-        setTimeout(() => feedbackSpan.innerHTML = "", 1200);
-    }
-    
-    function useSkip() {
-        if (!gameActive || answeringLock) return;
-        if (skipsRemaining <= 0) { feedbackSpan.innerHTML = "No skips left!"; return; }
-        if (currentIndex + 1 >= currentGameQuestions.length && playerLives > 0) { feedbackSpan.innerHTML = "Last question cannot be skipped!"; return; }
-        stopTimer();
-        answeringLock = true;
-        skipsRemaining--;
-        updateUI();
-        feedbackSpan.innerHTML = "⏩ Skipped! Moving to next question (no penalty).";
-        // skip without penalty, move forward
-        currentIndex++;
-        if (currentIndex >= currentGameQuestions.length && playerLives > 0) {
-            gameActive = false;
-            feedbackSpan.innerHTML = `🏆 VICTORY! You conquered the gauntlet! Score: ${playerScore}`;
-            optionsDiv.innerHTML = "<div style='text-align:center'>🌟 MASTER OF LITERATURE 🌟</div>";
-            nextArea.style.display = "none";
-            return;
-        }
-        answeringLock = false;
-        loadQuestion();
-    }
-    
-    function loadQuestion() {
-        answeringLock = false;
-        nextArea.style.display = "none";
-        feedbackSpan.innerHTML = "";
-        if (!gameActive) return;
-        if (currentIndex >= currentGameQuestions.length) {
-            gameActive = false;
-            stopTimer();
-            feedbackSpan.innerHTML = `🎉 VICTORY! FINAL SCORE: ${playerScore} 🎉 You mastered Honors English III!`;
-            optionsDiv.innerHTML = '<div style="text-align:center;">📚 LITERARY CHAMPION 📚<br>Restart to play again</div>';
-            nextArea.style.display = "none";
-            return;
-        }
-        const q = currentGameQuestions[currentIndex];
-        questionDiv.innerText = q.question;
-        if (q.passage) { passageDiv.style.display = "block"; passageDiv.innerText = q.passage; }
-        else passageDiv.style.display = "none";
-        optionsDiv.innerHTML = "";
-        q.options.forEach((opt, idx) => {
-            const btn = document.createElement("button");
-            btn.className = "option-btn";
-            btn.innerHTML = `<span style="background:cyan; width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:black;">${String.fromCharCode(65+idx)}</span> ${opt}`;
-            btn.addEventListener("click", (e) => handleAnswer(idx));
-            optionsDiv.appendChild(btn);
-        });
-        startTimer();
-    }
-    
-    function nextQuestion() {
-        if (!gameActive) return;
-        if (answeringLock) {
-            currentIndex++;
-            if (currentIndex < currentGameQuestions.length && playerLives > 0) loadQuestion();
-            else if (currentIndex >= currentGameQuestions.length && playerLives > 0) {
-                gameActive = false;
-                feedbackSpan.innerHTML = `🏆 TRIUMPH! SCORE: ${playerScore} — literary genius!`;
+            // Calculate Damage
+            let dmg = 0;
+            let timeBonus = Math.floor(this.timeLeft / 10);
+            
+            if (this.currentCategory === 'works') dmg = 25 + timeBonus;
+            if (this.currentCategory === 'terms') dmg = 15 + timeBonus;
+            if (this.currentCategory === 'vocab') dmg = 10 + (timeBonus * 2);
+            
+            // Heal if grammar
+            if (this.currentCategory === 'grammar') {
+                let heal = 20 + timeBonus;
+                this.playerHP = Math.min(this.maxPlayerHP, this.playerHP + heal);
+                this.createFloatingText(`+${heal} HP`, '#33ff33', true);
+                dmg = 5; // tiny damage
             }
+
+            dmg = Math.floor(dmg * (1 + (this.streak * 0.1)));
+            boss.hp -= dmg;
+            this.score += dmg * 10;
+            this.streak++;
+
+            this.createFloatingText(`-${dmg}`, '#ff0055');
+            this.shakeElement('boss-sprite');
+
+        } else {
+            // Player takes damage
+            this.streak = 1;
+            let bossDmg = 15 + (this.currentBossIndex * 5);
+            if (isTimeout) bossDmg += 10;
+            
+            this.playerHP -= bossDmg;
+            this.createFloatingText(`-${bossDmg}`, '#ff0000', true);
+            this.shakeElement('game-container');
+        }
+
+        this.updateHUD();
+
+        // Check death
+        if (this.playerHP <= 0) {
+            setTimeout(() => this.triggerGameOver(), 500);
+            return;
+        }
+
+        if (boss.hp <= 0) {
+            setTimeout(() => {
+                this.currentBossIndex++;
+                this.streak += 2; // Bonus streak for kill
+                this.createFloatingText("Boss Defeated!", '#00ffcc');
+                this.loadBoss();
+            }, 800);
         }
     }
-    
-    function restartGame() {
-        stopTimer();
-        // shuffle questions
-        currentGameQuestions = [...MASTER_QUESTIONS];
-        for (let i=currentGameQuestions.length-1;i>0;i--) {
-            const j = Math.floor(Math.random()*(i+1));
-            [currentGameQuestions[i], currentGameQuestions[j]] = [currentGameQuestions[j], currentGameQuestions[i]];
+
+    createFloatingText(msg, color, isPlayer = false) {
+        const arena = document.querySelector('.arena');
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = msg;
+        el.style.color = color;
+        
+        if (isPlayer) {
+            el.style.left = '20%';
+            el.style.top = '30%';
+        } else {
+            el.style.left = '50%';
+            el.style.top = '40%';
+            el.style.transform = 'translate(-50%, 0)';
         }
-        currentIndex = 0;
-        playerScore = 0;
-        streak = 0;
-        gameActive = true;
-        answeringLock = false;
-        // set lives & timer based on mode
-        if (currentMode === "classic") { playerLives = 3; timeLimit = 16; }
-        else if (currentMode === "endurance") { playerLives = 6; timeLimit = 99; timerZoneDiv.style.display = "none"; }
-        else if (currentMode === "blitz") { playerLives = 2; timeLimit = 10; }
-        hintsRemaining = 2;
-        skipsRemaining = 1;
-        updateUI();
-        loadQuestion();
+
+        arena.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
     }
-    
-    function setMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll(".mode-btn").forEach(btn => {
-            if(btn.dataset.mode === mode) btn.classList.add("active");
-            else btn.classList.remove("active");
-        });
-        restartGame();
+
+    shakeElement(id) {
+        const el = document.getElementById(id);
+        el.classList.remove('shake');
+        void el.offsetWidth; // trigger reflow
+        el.classList.add('shake');
+        setTimeout(() => el.classList.remove('shake'), 400);
     }
-    
-    // Event binding
-    document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-    document.getElementById("restartGameBtn").addEventListener("click", () => restartGame());
-    hintBtn.addEventListener("click", useHint);
-    skipBtn.addEventListener("click", useSkip);
-    document.querySelectorAll(".mode-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => setMode(btn.dataset.mode));
-    });
-    
-    // initial classic start
-    restartGame();
+
+    triggerGameOver() {
+        document.getElementById('screen-battle').classList.remove('active');
+        const endScreen = document.getElementById('screen-end');
+        endScreen.classList.add('active');
+        document.getElementById('end-title').innerText = "Exam Failed";
+        document.getElementById('end-title').style.color = "var(--damage)";
+        document.getElementById('end-score').innerText = `Final Score: ${this.score}`;
+        document.getElementById('end-msg').innerText = "The literary works overwhelmed you. Review your guide and try again!";
+    }
+
+    triggerVictory() {
+        document.getElementById('screen-battle').classList.remove('active');
+        const endScreen = document.getElementById('screen-end');
+        endScreen.classList.add('active');
+        document.getElementById('end-title').innerText = "A+ SCHOLAR";
+        document.getElementById('end-title').style.color = "var(--primary)";
+        document.getElementById('end-score').innerText = `Final Score: ${this.score}`;
+        document.getElementById('end-msg').innerText = "You have mastered the literature of Honors English III and conquered the final exam!";
+    }
+}
+
+// Init
+const game = new EnglishGame();
+
 </script>
 </body>
 </html>
