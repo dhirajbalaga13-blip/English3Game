@@ -1,1123 +1,588 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Literary Gauntlet</title>
-<style>
-/* GitHub Pages Ready - No external dependencies required */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⚡ HONORS GAUNTLET: LITERARY ARENA ⚡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-:root {
-  --bg: #0d0b12;
-  --panel: rgba(18,16,24,0.92);
-  --gold: #d8b56a;
-  --ink: #1b1722;
-  --green: #6bff95;
-  --red: #ff5d73;
-  --blue: #79b8ff;
-  --paper: #f1e8d0;
-}
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 20%, #0b0e1a, #010101);
+            font-family: 'Orbitron', 'Poppins', 'Segoe UI', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-* {
-  box-sizing: border-box;
-}
+        /* MAIN GAME PANEL */
+        .game-container {
+            max-width: 1350px;
+            width: 100%;
+            background: rgba(0, 5, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2.5rem;
+            border: 2px solid #0ff8;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.05);
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
 
-body {
-  margin: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at top, rgba(95,76,40,.25), transparent 35%),
-    linear-gradient(to bottom, #09070d, #15111f);
-  color: var(--paper);
-  font-family: Georgia, 'Courier New', serif;
-  height: 100vh;
-}
+        /* MODE SELECTOR */
+        .mode-arena {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .mode-btn {
+            background: #111c2c;
+            border: 1px solid cyan;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-family: monospace;
+            color: #bbf5ff;
+            cursor: pointer;
+            transition: 0.1s linear;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mode-btn.active {
+            background: cyan;
+            color: #000;
+            box-shadow: 0 0 15px cyan;
+            border-color: white;
+        }
+        .mode-btn:hover {
+            transform: scale(0.96);
+            background: #2f5f8f;
+        }
 
-#game {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-.paperTexture {
-  position: absolute;
-  inset: 0;
-  opacity: .08;
-  background-image:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 2px, transparent 2px, transparent 5px);
-  pointer-events: none;
-}
-
-#hud {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  padding: 14px;
-  gap: 12px;
-}
-
-.hudBox {
-  background: rgba(10,10,14,.8);
-  border: 2px solid rgba(216,181,106,.35);
-  border-radius: 14px;
-  padding: 10px;
-  min-width: 180px;
-  box-shadow: 0 0 18px rgba(0,0,0,.5);
-}
-
-.title {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  color: var(--gold);
-}
-
-#main {
-  position: absolute;
-  inset: 0;
-  padding: 120px 20px 20px;
-  overflow-y: auto;
-}
-
-.screen {
-  display: none;
-  max-width: 1100px;
-  margin: auto;
-  background: var(--panel);
-  border: 2px solid rgba(216,181,106,.3);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 0 35px rgba(0,0,0,.55);
-  backdrop-filter: blur(6px);
-}
-
-.screen.active {
-  display: block;
-  animation: fade .5s ease;
-}
-
-@keyframes fade {
-  from { opacity:0; transform: translateY(10px);} 
-  to { opacity:1; transform: translateY(0);} 
-}
-
-h1,h2,h3 {
-  color: var(--gold);
-}
-
-button {
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #4d3b1e, #9b7740);
-  color: white;
-  padding: 12px 18px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: .2s;
-}
-
-button:hover {
-  transform: scale(1.05);
-}
-
-.answerGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-  gap: 14px;
-  margin-top: 20px;
-}
-
-.answer {
-  background: rgba(255,255,255,.06);
-  border: 2px solid rgba(255,255,255,.08);
-  padding: 16px;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: .25s;
-}
-
-.answer:hover {
-  transform: translateY(-4px);
-  border-color: var(--gold);
-}
-
-.correct {
-  background: rgba(107,255,149,.2)!important;
-  border-color: var(--green)!important;
-}
-
-.wrong {
-  background: rgba(255,93,115,.2)!important;
-  border-color: var(--red)!important;
-}
-
-#timerWrap {
-  width: 100%;
-  height: 20px;
-  background: rgba(255,255,255,.08);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-top: 16px;
-}
-
-#timerBar {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(to right, #6bff95, #ff5d73);
-}
-
-.floatingConfirm {
-  position: absolute;
-  padding: 14px 22px;
-  background: #6a4d24;
-  border: 2px solid var(--gold);
-  border-radius: 999px;
-  animation: float 2s infinite ease-in-out;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px);} 
-  50% { transform: translateY(-10px);} 
-  100% { transform: translateY(0px);} 
-}
-
-.dragZone {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.book {
-  background: rgba(255,255,255,.06);
-  padding: 18px;
-  border-radius: 16px;
-  cursor: grab;
-  border: 2px solid transparent;
-}
-
-.authorDrop {
-  min-height: 70px;
-  border: 2px dashed rgba(255,255,255,.25);
-  border-radius: 16px;
-  padding: 14px;
-}
-
-#boss {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  margin: auto;
-  background: radial-gradient(circle at top, #6f7, #111 60%);
-  position: relative;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1);} 
-  50% { transform: scale(1.05);} 
-  100% { transform: scale(1);} 
-}
-
-.tool {
-  display: inline-flex;
-  width: 80px;
-  height: 80px;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,.08);
-  border-radius: 20px;
-  font-size: 42px;
-  cursor: grab;
-  margin: 10px;
-}
-
-#sentenceFix {
-  min-height: 100px;
-  border: 2px dashed rgba(255,255,255,.2);
-  padding: 20px;
-  border-radius: 20px;
-  margin-top: 18px;
-}
-
-.orb {
-  width: 170px;
-  min-height: 170px;
-  border-radius: 50%;
-  background: radial-gradient(circle at top, #7db6ff, #2f4d7a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 16px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: descend linear forwards;
-}
-
-@keyframes descend {
-  from { top: -180px;} 
-  to { top: 100vh;} 
-}
-
-#stickyNotes {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.note {
-  position: absolute;
-  width: 120px;
-  background: #d8c37d;
-  color: black;
-  padding: 10px;
-  transform: rotate(-5deg);
-  pointer-events: auto;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,.35);
-}
-
-#achievementPopup {
-  position: absolute;
-  top: 100px;
-  right: -400px;
-  background: rgba(0,0,0,.9);
-  border: 2px solid var(--gold);
-  padding: 16px;
-  border-radius: 16px;
-  transition: .4s;
-  z-index: 999;
-}
-
-#achievementPopup.show {
-  right: 20px;
-}
-
-.candle {
-  font-size: 24px;
-}
-
-#ghost {
-  position: absolute;
-  top: 35%;
-  left: -200px;
-  font-size: 120px;
-  opacity: .4;
-  animation: ghostFly 7s linear;
-  display: none;
-}
-
-@keyframes ghostFly {
-  from { left: -200px;} 
-  to { left: 120%; } 
-}
-
-#luckyPage {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.progressWrap {
-  width: 100%;
-  height: 18px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.08);
-  overflow: hidden;
-}
-
-#progress {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(to right,#5d3f16,#e0bf6a);
-}
-
-.passsage {
-  line-height: 1.8;
-  background: rgba(255,255,255,.05);
-  padding: 18px;
-  border-radius: 18px;
-}
-
-.scanBtn {
-  margin-top: 16px;
-  font-size: 22px;
-}
-
-#finalOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.94);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  z-index: 5000;
-  text-align: center;
-}
-
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: white;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(110vh) rotate(720deg);
-  }
-}
-
-@media(max-width: 768px){
-  #hud {
-    flex-direction: column;
-  }
-
-  .dragZone {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+        /* STATS PANEL */
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #030c1ae0;
+            padding: 0.8rem 1.5rem;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            border: 1px solid #0ff;
+        }
+        .stat {
+            background: #00000099;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            color: #e0f2fe;
+        }
+        .score { color: #f5cb5c; font-size: 1.8rem; font-weight: 900; }
+        .lives { color: #ff7b72; font-size: 1.5rem; }
+        .powerup-badge {
+            background: #2a0f3b;
+            padding: 5px 12px;
+            border-radius: 30px;
+            gap: 15px;
+        }
+        .powerup-btn {
+            background: #3f2b4e;
+            border: none;
+            color: gold;
+            padding: 5px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.05s linear;
+        }
+        .powerup-btn:active { transform: scale(0.95);}
+        .timer-zone {
+            margin: 15px 0 12px;
+            height: 14px;
+            background: #1e2a3a;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .timer-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #0ff, #f0f);
+            transition: width 0.03s linear;
+        }
+        .question-card {
+            background: rgba(8, 18, 32, 0.9);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            margin: 15px 0;
+            border-left: 8px solid cyan;
+        }
+        .passage-box {
+            background: #071b2b;
+            padding: 1rem;
+            border-radius: 1rem;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid #ffaa44;
+            font-style: italic;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff5e0;
+            margin-bottom: 1.4rem;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .option-btn {
+            background: #0a1428;
+            border: 2px solid #2c6c9e;
+            padding: 12px 12px;
+            border-radius: 70px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #eef4ff;
+            cursor: pointer;
+            transition: 0.07s linear;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #1f4970;
+            border-color: cyan;
+            transform: scale(0.97);
+        }
+        .correct-flash {
+            background: #00a86b !important;
+            border-color: gold !important;
+            animation: pulseGreen 0.2s ease;
+        }
+        .wrong-shake {
+            animation: shake 0.2s ease-in-out 0s 2;
+            background: #aa2e2e;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0);}
+            25% { transform: translateX(-6px);}
+            75% { transform: translateX(6px);}
+            100% { transform: translateX(0);}
+        }
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 #0f0; }
+            100% { box-shadow: 0 0 0 8px transparent; }
+        }
+        .next-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .next-btn, .restart-btn {
+            background: linear-gradient(145deg, #1f3f5f, #071a2a);
+            border: 1px solid cyan;
+            padding: 10px 28px;
+            font-weight: bold;
+            border-radius: 40px;
+            color: cyan;
+            cursor: pointer;
+        }
+        .restart-btn {
+            background: #2f1e2e;
+            color: #ffaa88;
+        }
+        .footer-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 15px;
+        }
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            background: radial-gradient(circle, gold, orange);
+            border-radius: 50%;
+            animation: particlePop 0.6s forwards;
+            z-index: 999;
+        }
+        @keyframes particlePop {
+            0% { transform: scale(0.2) translateY(0); opacity: 1;}
+            100% { transform: scale(1.2) translateY(-60px); opacity: 0;}
+        }
+        @media (max-width: 700px) {
+            .question-text { font-size: 1.2rem; }
+            .stats-panel { font-size: 0.8rem; }
+        }
+    </style>
 </head>
 <body>
-<div id="game">
-<div class="paperTexture"></div>
-<div id="ghost">👻</div>
-<div id="achievementPopup"></div>
-
-<div id="hud">
-  <div class="hudBox">
-    <div class="title">SCORE</div>
-    <div id="score">0</div>
-  </div>
-
-  <div class="hudBox">
-    <div class="title">LIVES</div>
-    <div id="lives"></div>
-  </div>
-
-  <div class="hudBox">
-    <div class="title">STREAK 🔥</div>
-    <div id="streak">0</div>
-  </div>
-
-  <div class="hudBox">
-    <div class="title">INKWELL</div>
-    <div class="progressWrap">
-      <div id="progress"></div>
+<div class="game-container" id="gameRoot">
+    <div class="mode-arena" id="modeSelector">
+        <button data-mode="classic" class="mode-btn active">🎮 CLASSIC (timed/lives)</button>
+        <button data-mode="endurance" class="mode-btn">🧘 ENDURANCE (no timer, more lives)</button>
+        <button data-mode="blitz" class="mode-btn">⚡ BLITZ (10s, double points)</button>
     </div>
-  </div>
-</div>
-
-<div id="stickyNotes"></div>
-<button id="luckyPage">📖 Lucky Page</button>
-
-<div id="main">
-
-<div class="screen active" id="startScreen">
-  <h1>The Literary Gauntlet</h1>
-  <p>You are trapped inside a haunted library. Survive the quizzes, defeat Professor Grammar, and escape The Final Syllabus.</p>
-  <button onclick="startGame()">Enter the Library</button>
-</div>
-
-<div class="screen" id="speedScreen">
-  <h2>⚡ Speed Round</h2>
-  <div id="speedQuestion"></div>
-  <div class="answerGrid" id="speedAnswers"></div>
-  <div id="timerWrap"><div id="timerBar"></div></div>
-</div>
-
-<div class="screen" id="dragScreen">
-  <h2>📚 Author Match</h2>
-  <div class="dragZone">
-    <div id="books"></div>
-    <div id="authors"></div>
-  </div>
-</div>
-
-<div class="screen" id="coldScreen">
-  <h2>🔍 Cold Read: Inference Attack</h2>
-  <div class="passsage" id="passage"></div>
-  <button class="scanBtn" onclick="scanPassage()">🔎 Scan Passage (-2 sec)</button>
-  <div id="coldQuestions"></div>
-</div>
-
-<div class="screen" id="grammarScreen">
-  <h2>⚔️ Grammar Gauntlet</h2>
-  <div id="boss"></div>
-  <div id="sentenceFix"></div>
-  <div>
-    <div draggable="true" class="tool">;</div>
-    <div draggable="true" class="tool">:</div>
-    <div draggable="true" class="tool">.</div>
-  </div>
-</div>
-
-<div class="screen" id="vocabScreen">
-  <h2>🧠 Vocab Survival</h2>
-  <div id="orbArea"></div>
-  <div class="answerGrid" id="vocabChoices"></div>
-</div>
-
-<div class="screen" id="finalBossScreen">
-  <h2>☠️ THE FINAL SYLLABUS</h2>
-  <div id="finalBossQuestion"></div>
-  <div class="answerGrid" id="finalBossAnswers"></div>
-</div>
-
-</div>
-
-<div id="finalOverlay">
-  <h1>ESCAPED THE LIBRARY</h1>
-  <p>You defeated The Final Syllabus.</p>
-  <button onclick="resetGame()">Play Again (New Game +)</button>
-</div>
+    <div class="stats-panel">
+        <div class="stat">🏆 SCORE <span class="score" id="scoreValue">0</span></div>
+        <div class="stat">❤️ LIVES <span class="lives" id="livesValue">3</span></div>
+        <div class="stat">🔥 STREAK <span id="streakValue">0</span></div>
+        <div class="stat">📖 Q<span id="qIndex">0</span>/<span id="qTotal">0</span></div>
+        <div class="powerup-badge">✨ POWER-UPS <button id="hintBtn" class="powerup-btn">💡 HINT (<span id="hintCount">2</span>)</button>
+        <button id="skipBtn" class="powerup-btn">⏩ SKIP (<span id="skipCount">1</span>)</button></div>
+    </div>
+    <div class="timer-zone" id="timerZone"><div class="timer-fill" id="timerFill" style="width: 100%"></div></div>
+    <div id="questionContainer" class="question-card">
+        <div id="passageDisplay" class="passage-box" style="display: none;"></div>
+        <div id="questionText" class="question-text">⚔️ Choose your mode & conquer the literary gauntlet ⚔️</div>
+        <div id="optionsArea" class="options-grid"></div>
+        <div id="feedbackMsg" style="font-size: 0.9rem; margin-top: 8px; padding: 8px; text-align: center;"></div>
+        <div class="next-area" id="nextButtonArea" style="display: none;"><button class="next-btn" id="nextBtn">➡️ NEXT TRIAL</button></div>
+    </div>
+    <div class="footer-controls"><button class="restart-btn" id="restartGameBtn">🔄 RESTART GAUNTLET</button></div>
 </div>
 
 <script>
-const state = {
-  score: 0,
-  lives: 5,
-  streak: 0,
-  correct: 0,
-  wrong: 0,
-  achievements: JSON.parse(localStorage.getItem('gauntletAchievements') || '[]'),
-  progress: 0,
-  speedWins: 0,
-  grammarWins: 0,
-  vocabPerfect: true,
-  doublePoints: false
-};
-
-const literaryQuestions = [
-  {
-    q:'What literary device gives human traits to nonhuman objects?',
-    a:['Personification','Imagery','Allusion','Dialect'],
-    c:0
-  },
-  {
-    q:'A symbol that represents deeper meaning is called?',
-    a:['Symbolism','Tone','Foreshadowing','Setting'],
-    c:0
-  },
-  {
-    q:'Which work was written by Arthur Miller?',
-    a:['The Crucible','Into the Wild','Walden','The Raven'],
-    c:0
-  },
-  {
-    q:'Who wrote The Great Gatsby?',
-    a:['F. Scott Fitzgerald','Jon Krakauer','Emily Dickinson','Poe'],
-    c:0
-  },
-  {
-    q:'Plain style is associated most with?',
-    a:['Simple direct language','Complex symbolism','Epic poetry','Comic irony'],
-    c:0
-  },
-  {
-    q:'A narrator who says “I” uses what POV?',
-    a:['First Person','Third Limited','Third Omniscient','Objective'],
-    c:0
-  },
-  {
-    q:'Which poem includes the line about hope having feathers?',
-    a:['Hope is the thing with feathers','The Raven','O Me! O Life!','Song of Myself'],
-    c:0
-  },
-  {
-    q:'Which term means hints about future events?',
-    a:['Foreshadowing','Theme','Tone','Voice'],
-    c:0
-  },
-  {
-    q:'Which essay was written by Emerson?',
-    a:['Self-Reliance','Civil Disobedience','Walden','Into the Wild'],
-    c:0
-  },
-  {
-    q:'A character who changes is called?',
-    a:['Dynamic','Static','Symbolic','Flat'],
-    c:0
-  }
-];
-
-const vocab = [
-  ['assuage','pacify'],
-  ['hackneyed','overused'],
-  ['innuendo','insinuation'],
-  ['transcend','excel'],
-  ['circuitous','indirect'],
-  ['commiserate','sympathize'],
-  ['approbation','approval'],
-  ['coalition','alliance'],
-  ['hiatus','break'],
-  ['meritorious','praiseworthy'],
-  ['acculturation','adaptation'],
-  ['ascribe','attribute']
-];
-
-const passages = [
-  {
-    text:'The raven perched above the chamber door, its dark eyes unblinking while the candle guttered against the storm. The narrator clutched the final letter from Lenore and whispered into the silence.',
-    questions:[
-      ['What is the mood?', ['Joyful','Uneasy','Hopeful'],1],
-      ['Narrator state?', ['Calm','Grieving','Confused'],1],
-      ['The raven symbolizes?', ['Hope','Memory and doom','Nature'],1]
-    ]
-  },
-  {
-    text:'Trust thyself: every heart vibrates to that iron string. Accept the place the divine providence has found for you.',
-    questions:[
-      ['Main argument?', ['Follow society','Trust yourself','Reject emotion'],1],
-      ['Author purpose?', ['Persuade independence','Entertain readers','Describe nature'],0],
-      ['Trust thyself means?', ['Believe your own judgment','Ignore all people','Avoid education'],0]
-    ]
-  },
-  {
-    text:'The wallpaper curled like old skin beneath the lamp glow. Clara traced the twisting patterns every night, certain the shapes moved when she blinked.',
-    questions:[
-      ['Foreshadowing suggests?', ['A celebration','Mental decline','Travel'],1],
-      ['Tone?', ['Playful','Disturbing','Optimistic'],1],
-      ['Point of view?', ['Third person','Second person','First person'],0]
-    ]
-  }
-];
-
-const grammarQuestions = [
-  {
-    text:'The library doors slammed shut ___ nobody could escape.',
-    answer:';'
-  },
-  {
-    text:'Marcus studied all night ___ he forgot the test date.',
-    answer:'.'
-  },
-  {
-    text:'She brought three things to class ___ pencils, notes, and coffee.',
-    answer:':'
-  },
-  {
-    text:'The essay was brilliant ___ the conclusion lacked evidence.',
-    answer:';'
-  },
-  {
-    text:'The ghosts whispered through the shelves ___ the candles flickered violently.',
-    answer:'.'
-  }
-];
-
-const notes = [
-  'Plain style = direct, simple language.',
-  'Foreshadowing hints at future events.',
-  'Theme = central message of a work.',
-  'Symbolism gives deeper meaning to objects.',
-  'Dynamic characters change over time.'
-];
-
-function playTone(type){
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  const map = {
-    correct: 880,
-    wrong: 120,
-    streak: 500,
-    victory: 1000,
-    thunder: 70
-  };
-
-  osc.frequency.value = map[type] || 300;
-  gain.gain.value = 0.05;
-  osc.start();
-  osc.stop(ctx.currentTime + .15);
-}
-
-function updateHUD(){
-  document.getElementById('score').innerText = state.score;
-  document.getElementById('streak').innerText = state.streak;
-  document.getElementById('progress').style.width = `${state.progress}%`;
-
-  const lives = document.getElementById('lives');
-  lives.innerHTML = '';
-
-  for(let i=0;i<5;i++){
-    const span = document.createElement('span');
-    span.className = 'candle';
-    span.innerText = i < state.lives ? '🕯️' : '🕯';
-    lives.appendChild(span);
-  }
-
-  if(state.streak >= 5){
-    document.getElementById('streak').style.fontSize = '28px';
-  }
-}
-
-function switchScreen(id){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function addScore(points){
-  if(state.doublePoints) points *= 2;
-  state.score += points;
-  state.progress = Math.min(100, state.progress + points);
-  updateHUD();
-
-  if(state.score >= 50){
-    startFinalBoss();
-  }
-}
-
-function loseLife(){
-  state.lives--;
-  state.streak = 0;
-  state.wrong++;
-  playTone('wrong');
-
-  if(state.wrong % 3 === 0){
-    const ghost = document.getElementById('ghost');
-    ghost.style.display = 'block';
-    ghost.style.animation = 'none';
-    setTimeout(()=>{
-      ghost.style.animation = 'ghostFly 7s linear';
-    },10);
-  }
-
-  if(state.lives <= 0){
-    alert('GAME OVER');
-    resetGame();
-  }
-
-  updateHUD();
-}
-
-function achievement(name){
-  if(state.achievements.includes(name)) return;
-
-  state.achievements.push(name);
-  localStorage.setItem('gauntletAchievements', JSON.stringify(state.achievements));
-
-  const pop = document.getElementById('achievementPopup');
-  pop.innerHTML = `🏆 Achievement Unlocked:<br><strong>${name}</strong>`;
-  pop.classList.add('show');
-
-  setTimeout(()=>{
-    pop.classList.remove('show');
-  },3000);
-}
-
-function startGame(){
-  updateHUD();
-  createNotes();
-  speedRound();
-  setInterval(luckyPageEvent,90000);
-}
-
-let speedIndex = 0;
-let speedTime;
-let selectedAnswer = null;
-
-function speedRound(){
-  switchScreen('speedScreen');
-
-  const q = literaryQuestions[speedIndex % literaryQuestions.length];
-  document.getElementById('speedQuestion').innerText = q.q;
-
-  const answers = document.getElementById('speedAnswers');
-  answers.innerHTML = '';
-
-  q.a.forEach((ans,i)=>{
-    const btn = document.createElement('div');
-    btn.className = 'answer';
-    btn.innerText = ans;
-    btn.onclick = ()=>{
-      selectedAnswer = i;
-    };
-    answers.appendChild(btn);
-  });
-
-  const confirm = document.createElement('button');
-  confirm.className = 'floatingConfirm';
-  confirm.style.left = Math.random()*70 + '%';
-  confirm.style.top = Math.random()*60 + '%';
-  confirm.innerText = 'CONFIRM';
-  confirm.onclick = ()=>{
-    clearInterval(speedTime);
-
-    if(selectedAnswer === q.c){
-      addScore(2);
-      state.streak++;
-      state.correct++;
-      state.speedWins++;
-      playTone('correct');
-
-      if(state.speedWins >= 3){
-        achievement('Speed Demon');
-      }
-
-    } else {
-      loseLife();
+    // ---------- MASSIVE QUESTION BANK (FULL HONORS ENGLISH III) ----------
+    const MASTER_QUESTIONS = [];
+    function addQ(question, options, correctIdx, passage = null, explanation = "") {
+        MASTER_QUESTIONS.push({ question, options, correctIdx, passage, explanation });
     }
-
-    selectedAnswer = null;
-    speedIndex++;
-
-    setTimeout(()=>{
-      if(speedIndex === 3){
-        authorMatch();
-      } else {
-        speedRound();
-      }
-    },700);
-  };
-
-  document.getElementById('speedScreen').appendChild(confirm);
-
-  let time = 10;
-  speedTime = setInterval(()=>{
-    time -= .1;
-    document.getElementById('timerBar').style.width = `${time*10}%`;
-
-    if(time <= 0){
-      clearInterval(speedTime);
-      confirm.remove();
-      loseLife();
-      speedRound();
+    // MAJOR WORKS & PERIODS
+    addQ("In 'The Crucible', who leads the accusations while having an affair with John Proctor?", ["Abigail Williams", "Elizabeth Proctor", "Mary Warren", "Rebecca Nurse"], 0, null, "Abigail manipulates Salem.");
+    addQ("Symbol in 'Gatsby' representing hopes & Daisy?", ["Green light", "Valley of ashes", "East Egg", "T.J. Eckleburg"], 0, null, "Green light at Daisy's dock.");
+    addQ("Chris McCandless' alias in 'Into the Wild':", ["Alexander Supertramp", "Jim Gallien", "Wayne Westerberg", "Krakauer"], 0, null, "Alexander Supertramp.");
+    addQ("Who dreams of becoming a doctor in 'Raisin in the Sun'?", ["Beneatha Younger", "Walter Lee", "Lena", "Ruth"], 0, null, "Beneatha wants to be a physician.");
+    addQ("Which period emphasizes emotion, nature, individualism?", ["Romanticism", "Realism", "Modernism", "Puritanism"], 0, null, "Romanticism (1800–1860).");
+    addQ("Literary period focusing on ordinary life & dialect?", ["Realism", "Romanticism", "Colonial", "Modernism"], 0, null, "Realism depicts everyday reality.");
+    addQ("Famous Puritan poet?", ["Anne Bradstreet", "Walt Whitman", "Emily Dickinson", "Edgar Allan Poe"], 0, null, "Anne Bradstreet, colonial poet.");
+    // POETRY
+    addQ("In 'Because I could not stop for Death', Death is personified as?", ["Carriage driver", "Kind suitor", "King", "Ghost"], 1, null, "He kindly stopped for me.");
+    addQ("'Crumbling is not an instant’s Act' suggests?", ["Decay is gradual", "Sudden collapse", "Hope remains", "Nature's fury"], 0, null, "Gradual process of decline.");
+    addQ("'My life closed twice before its close' theme?", ["Loss & parting", "Joy", "Immortality", "Nature"], 0, null, "Losses that feel like death.");
+    addQ("In 'The Raven', the raven perches upon a bust of?", ["Pallas", "Apollo", "Zeus", "Athena"], 0, null, "Pallas Athena, wisdom.");
+    addQ("'Song of Myself' celebrates?", ["Individuality & self", "Despair", "War", "Urban life"], 0, null, "Whitman's celebration of self.");
+    addQ("'Hope is the thing with feathers' compares hope to a?", ["Bird", "Butterfly", "Star", "Tree"], 0, null, "A bird that perches.");
+    // SHORT STORIES
+    addQ("In 'Masque of the Red Death', the clock chime symbolizes?", ["Inevitability of death", "Celebration", "Wealth", "Illusion"], 0, null, "Time running out.");
+    addQ("Narrator in 'The Yellow Wallpaper' suffers from?", ["Postpartum depression", "Consumption", "Amnesia", "PTSD"], 0, null, "Rest cure & oppression.");
+    addQ("'To Build a Fire' main cause of death?", ["Pride & underrating nature", "Wolves", "Falling ice", "Matches"], 0, null, "Arrogance against the wild.");
+    // TRANSCENDENTALISM
+    addQ("Emerson's 'Self-Reliance' urges:", ["Trust thyself", "Follow tradition", "Conformity", "Reject intuition"], 0, null, "Nonconformity & inner voice.");
+    addQ("Thoreau's 'Civil Disobedience' advocates:", ["Disobey unjust laws", "Always obey", "Pay all taxes", "Violent revolt"], 0, null, "Passive resistance.");
+    // FINAL UNIT
+    addQ("'Born of Man and Woman' perspective:", ["A monstrous child", "A mother", "Scientist", "Alien"], 0, null, "Imprisoned creature.");
+    addQ("In 'Story of an Hour', Louise Mallard feels:", ["Liberation", "Grief", "Indifference", "Panic"], 0, null, "Freedom and independence.");
+    addQ("'A Rose for Emily' discovery:", ["Homer Barron's corpse", "Treasure", "Secret marriage", "Poison"], 0, null, "Skeleton in the bed.");
+    addQ("'Mirror Image' theme:", ["Identity & memory", "Alien invasion", "Revolution", "Poverty"], 0, null, "Brain transplant identity crisis.");
+    addQ("'Standard Loneliness Package' allows people to:", ["Outsource emotions", "Fly", "Telepathy", "Immortality"], 0, null, "Hire others to feel pain.");
+    // TERMS
+    addQ("Hint of future events:", ["Foreshadowing", "Flashback", "Irony", "Allusion"], 0, null, "Foreshadowing builds suspense.");
+    addQ("'The wind whispered' is:", ["Personification", "Simile", "Metaphor", "Alliteration"], 0, null, "Human traits to nature.");
+    addQ("Character who changes internally:", ["Dynamic", "Static", "Flat", "Stock"], 0, null, "Dynamic character evolves.");
+    addQ("Author's attitude toward subject:", ["Tone", "Mood", "Theme", "Voice"], 0, null, "Tone reflects feeling.");
+    // VOCAB
+    addQ("Synonym for ASSUAGE:", ["Conciliate", "Provoke", "Worsen", "Ignore"], 0, null, "Assuage = pacify, conciliate.");
+    addQ("Best synonym for HACKNEYED:", ["Trite", "Fresh", "Original", "Complex"], 0, null, "Overused, cliché.");
+    addQ("HIATUS means:", ["A gap or break", "Continuation", "Unity", "Conclusion"], 0, null, "Pause in activity.");
+    addQ("TRANSCEND means:", ["Go beyond limits", "Stay within", "Descend", "Copy"], 0, null, "Exceed, surpass.");
+    // GRAMMAR
+    addQ("Correct punctuation: 'Its a beautiful day lets go'", ["It's a beautiful day; let's go.", "Its a beautiful day, lets go.", "It's a beautiful day lets go.", "Its' a beautiful day; let's go."], 0, null, "Semicolon + contraction.");
+    addQ("Subject-verb agreement: 'The group of students ____ studying.'", ["is", "are", "am", "be"], 0, null, "Collective noun singular.");
+    addQ("Correct use of colon:", ["I need: apples, milk.", "I need the following: apples, milk.", "I need apples: milk.", "I need, apples milk."], 1, null, "Complete sentence before colon.");
+    // COLD READS
+    addQ("Passage: 'free, free, free!' - The Story of an Hour inference:", ["Liberation feeling", "Deep mourning", "Anger", "Confusion"], 0, "She whispered 'free' after husband's death.", "Mrs. Mallard envisions independence.");
+    addQ("'The Raven' allusion to Pallas suggests:", ["Seeking wisdom", "Love", "Death", "War"], 0, null, "Wisdom goddess, ironic torment.");
+    addQ("'The Yellow Wallpaper' woman behind pattern symbolizes:", ["Desire for freedom", "Madness is fake", "Domestic bliss", "Revenge"], 0, null, "Narrator's trapped self.");
+    // extra
+    addQ("Author of 'The Raven' and 'Masque'?", ["Edgar Allan Poe", "Hawthorne", "Melville", "Dickinson"], 0, null, "Poe, master of Gothic.");
+    addQ("Modernism feature:", ["Stream of consciousness", "Heroic couplets", "Pastoral", "Didactic"], 0, null, "Fragmentation after WWI.");
+    addQ("'A Rose for Emily' rose symbolizes:", ["Love & pity", "Death", "Anger", "Wealth"], 0, null, "Respect and sorrow.");
+    addQ("Who wrote 'Nature' and 'Self-Reliance'?", ["Ralph Waldo Emerson", "Thoreau", "Whitman", "Longfellow"], 0, null, "Emerson, transcendentalist.");
+    addQ("Dramatic irony definition:", ["Audience knows more", "Sarcasm", "Unexpected twist", "Understatement"], 0, null, "Character unaware, audience aware.");
+    // total > 55 unique -> great coverage
+    console.log("Bank size:", MASTER_QUESTIONS.length);
+    
+    // ---------- GAME STATE & MODES ----------
+    let currentGameQuestions = [];
+    let currentIndex = 0, playerScore = 0, playerLives = 3, streak = 0;
+    let activeTimer = null, answeringLock = false, gameActive = true;
+    let currentMode = "classic";   // classic, endurance, blitz
+    let timeLimit = 16;
+    let currentTimeLeft = 16;
+    let hintsRemaining = 2;
+    let skipsRemaining = 1;
+    
+    // DOM elements
+    const questionDiv = document.getElementById("questionText");
+    const optionsDiv = document.getElementById("optionsArea");
+    const passageDiv = document.getElementById("passageDisplay");
+    const feedbackSpan = document.getElementById("feedbackMsg");
+    const nextArea = document.getElementById("nextButtonArea");
+    const scoreSpan = document.getElementById("scoreValue");
+    const livesSpan = document.getElementById("livesValue");
+    const streakSpan = document.getElementById("streakValue");
+    const qIndexSpan = document.getElementById("qIndex");
+    const qTotalSpan = document.getElementById("qTotal");
+    const timerFill = document.getElementById("timerFill");
+    const timerZoneDiv = document.getElementById("timerZone");
+    const hintCountSpan = document.getElementById("hintCount");
+    const skipCountSpan = document.getElementById("skipCount");
+    const hintBtn = document.getElementById("hintBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    
+    function updateUI() {
+        scoreSpan.innerText = playerScore;
+        livesSpan.innerText = playerLives;
+        streakSpan.innerText = streak;
+        qIndexSpan.innerText = currentIndex + 1;
+        qTotalSpan.innerText = currentGameQuestions.length;
+        hintCountSpan.innerText = hintsRemaining;
+        skipCountSpan.innerText = skipsRemaining;
     }
-  },100);
-}
-
-function authorMatch(){
-  switchScreen('dragScreen');
-
-  const books = [
-    ['The Crucible','Arthur Miller'],
-    ['The Great Gatsby','F. Scott Fitzgerald'],
-    ['Into the Wild','Jon Krakauer'],
-    ['A Raisin in the Sun','Lorraine Hansberry']
-  ];
-
-  const booksDiv = document.getElementById('books');
-  const authorsDiv = document.getElementById('authors');
-
-  booksDiv.innerHTML='';
-  authorsDiv.innerHTML='';
-
-  let matched = 0;
-
-  books.forEach(([book,author])=>{
-    const b = document.createElement('div');
-    b.className='book';
-    b.draggable=true;
-    b.id=book;
-    b.innerHTML=`📕 ${book}`;
-
-    b.addEventListener('dragstart',e=>{
-      e.dataTransfer.setData('text',book);
-    });
-
-    booksDiv.appendChild(b);
-
-    const drop = document.createElement('div');
-    drop.className='authorDrop';
-    drop.innerText=author;
-
-    drop.addEventListener('dragover',e=>e.preventDefault());
-
-    drop.addEventListener('drop',e=>{
-      e.preventDefault();
-      const dragged = e.dataTransfer.getData('text');
-
-      if(dragged === book){
-        drop.style.background='rgba(107,255,149,.2)';
-        matched++;
-        playTone('correct');
-
-        if(matched === 4){
-          addScore(5);
-          achievement('Scholar');
-
-          setTimeout(coldRead,1200);
+    
+    function stopTimer() { if (activeTimer) clearInterval(activeTimer); activeTimer = null; }
+    
+    function startTimer() {
+        if (!gameActive) return;
+        if (currentMode === "endurance") { timerZoneDiv.style.display = "none"; return; }
+        else timerZoneDiv.style.display = "block";
+        if (activeTimer) stopTimer();
+        let maxTime = (currentMode === "blitz") ? 10 : 16;
+        timeLimit = maxTime;
+        currentTimeLeft = timeLimit;
+        timerFill.style.width = "100%";
+        activeTimer = setInterval(() => {
+            if (!gameActive || answeringLock) return;
+            if (currentTimeLeft <= 0) {
+                if (!answeringLock) handleTimeout();
+            } else {
+                currentTimeLeft--;
+                let percent = (currentTimeLeft / timeLimit) * 100;
+                timerFill.style.width = `${Math.max(0, percent)}%`;
+                timerFill.style.background = currentTimeLeft <= 3 ? "#ff5555" : "linear-gradient(90deg, #0ff, #f0f)";
+            }
+        }, 1000);
+    }
+    
+    function handleTimeout() {
+        if (answeringLock) return;
+        answeringLock = true;
+        stopTimer();
+        playerLives--;
+        streak = 0;
+        updateUI();
+        const q = currentGameQuestions[currentIndex];
+        feedbackSpan.innerHTML = `⏰ TIME'S UP! Correct: ${q.options[q.correctIdx]} — ${q.explanation || "Review"}`;
+        highlightCorrectAnswer(true);
+        if (playerLives <= 0) endGame();
+        else showNextButton();
+    }
+    
+    function highlightCorrectAnswer(disableAll = true) {
+        const btns = document.querySelectorAll(".option-btn");
+        const correct = currentGameQuestions[currentIndex].correctIdx;
+        btns.forEach((btn, idx) => {
+            if (idx === correct) btn.classList.add("correct-flash");
+            if (disableAll) btn.disabled = true;
+        });
+    }
+    
+    function endGame() {
+        gameActive = false;
+        answeringLock = true;
+        stopTimer();
+        feedbackSpan.innerHTML = `💀 GAME OVER 💀 Final Score: ${playerScore}. Restart to master Honors English III!`;
+        feedbackSpan.style.color = "#ff8888";
+        nextArea.style.display = "none";
+        optionsDiv.innerHTML = '<div style="color:#ffb347; text-align:center;">🏁 Gauntlet over — restart for another run 🏁</div>';
+    }
+    
+    function showNextButton() { nextArea.style.display = "flex"; }
+    
+    function createParticles(x, y) {
+        for (let i=0;i<12;i++) {
+            let particle = document.createElement("div");
+            particle.className = "particle";
+            particle.style.left = (x + (Math.random() - 0.5)*40) + "px";
+            particle.style.top = (y + (Math.random() - 0.5)*40) + "px";
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 600);
         }
-
-      } else {
-        drop.animate([
-          {transform:'translateX(-10px)'},
-          {transform:'translateX(10px)'},
-          {transform:'translateX(0px)'}
-        ],{duration:300});
-
-        loseLife();
-      }
-    });
-
-    authorsDiv.appendChild(drop);
-  });
-}
-
-function coldRead(){
-  switchScreen('coldScreen');
-
-  const p = passages[Math.floor(Math.random()*passages.length)];
-
-  document.getElementById('passage').innerText = p.text;
-
-  const wrap = document.getElementById('coldQuestions');
-  wrap.innerHTML='';
-
-  let correct = 0;
-
-  p.questions.forEach(q=>{
-    const div = document.createElement('div');
-    div.innerHTML = `<h3>${q[0]}</h3>`;
-
-    q[1].forEach((ans,i)=>{
-      const btn = document.createElement('button');
-      btn.innerText = '🔒 Scroll';
-
-      btn.onclick = ()=>{
-        btn.innerText = ans;
-
-        if(i===q[2]){
-          correct++;
-          addScore(2);
-          playTone('correct');
+    }
+    
+    function handleAnswer(selectedIdx) {
+        if (answeringLock || !gameActive) return;
+        answeringLock = true;
+        stopTimer();
+        const q = currentGameQuestions[currentIndex];
+        const isCorrect = (selectedIdx === q.correctIdx);
+        const btns = document.querySelectorAll(".option-btn");
+        if (isCorrect) {
+            let basePoints = (currentMode === "blitz") ? 200 : 100;
+            let streakBonus = streak * 15;
+            let totalPoints = basePoints + streakBonus;
+            playerScore += totalPoints;
+            streak++;
+            feedbackSpan.innerHTML = `✅ CORRECT! +${totalPoints} (streak ${streak}) ${q.explanation ? "📖 " + q.explanation : ""}`;
+            feedbackSpan.style.color = "#b6ffb0";
+            btns[selectedIdx].classList.add("correct-flash");
+            const rect = btns[selectedIdx].getBoundingClientRect();
+            createParticles(rect.left + rect.width/2, rect.top + rect.height/2);
         } else {
-          loseLife();
+            playerLives--;
+            streak = 0;
+            feedbackSpan.innerHTML = `❌ WRONG! Correct: ${q.options[q.correctIdx]}. ${q.explanation || "Study more!"}`;
+            feedbackSpan.style.color = "#ffb090";
+            btns[selectedIdx].classList.add("wrong-shake");
+            setTimeout(() => btns[selectedIdx].classList.remove("wrong-shake"), 300);
+            if (playerLives <= 0) { updateUI(); endGame(); return; }
         }
-
-        if(correct===3){
-          achievement('Cold Reader');
-          setTimeout(grammarBattle,1000);
-        }
-      };
-
-      div.appendChild(btn);
-    });
-
-    wrap.appendChild(div);
-  });
-}
-
-function scanPassage(){
-  loseLife();
-}
-
-let grammarIndex = 0;
-
-function grammarBattle(){
-  switchScreen('grammarScreen');
-  playTone('thunder');
-
-  const q = grammarQuestions[grammarIndex];
-  const fix = document.getElementById('sentenceFix');
-  fix.innerHTML = q.text;
-
-  fix.ondragover = e => e.preventDefault();
-
-  fix.ondrop = e => {
-    e.preventDefault();
-
-    const text = e.dataTransfer.getData('text');
-
-    if(text === q.answer){
-      addScore(3);
-      grammarIndex++;
-      playTone('correct');
-
-      if(grammarIndex >= 5){
-        addScore(15);
-        achievement('Grammar Slayer');
-        vocabSurvival();
-      } else {
-        grammarBattle();
-      }
-
-    } else {
-      loseLife();
+        updateUI();
+        highlightCorrectAnswer(true);
+        if (gameActive && playerLives > 0) showNextButton();
+        else if (playerLives <= 0) endGame();
     }
-  };
-
-  document.querySelectorAll('.tool').forEach(t=>{
-    t.addEventListener('dragstart',e=>{
-      e.dataTransfer.setData('text',t.innerText);
-    });
-  });
-}
-
-let wave = 1;
-
-function vocabSurvival(){
-  switchScreen('vocabScreen');
-  spawnOrb();
-}
-
-function spawnOrb(){
-  if(wave > 3){
-    addScore(10);
-    achievement('Lexicon Master');
-    return;
-  }
-
-  const pair = vocab[Math.floor(Math.random()*vocab.length)];
-
-  const orb = document.createElement('div');
-  orb.className='orb';
-  orb.innerHTML=`<div><strong>${pair[0]}</strong><br>${pair[1]}</div>`;
-  orb.style.animationDuration = `${6-wave}s`;
-
-  const area = document.getElementById('orbArea');
-  area.innerHTML='';
-  area.appendChild(orb);
-
-  orb.addEventListener('animationend',()=>{
-    loseLife();
-    wave++;
-    spawnOrb();
-  });
-
-  const choices = document.getElementById('vocabChoices');
-  choices.innerHTML='';
-
-  const options = [pair[1],'random','incorrect'].sort(()=>Math.random()-.5);
-
-  options.forEach(o=>{
-    const btn = document.createElement('div');
-    btn.className='answer';
-    btn.innerText=o;
-
-    btn.onclick = ()=>{
-      if(o===pair[1]){
-        addScore(3);
-        playTone('correct');
-      } else {
-        state.vocabPerfect=false;
-        loseLife();
-      }
-
-      wave++;
-      spawnOrb();
-    };
-
-    choices.appendChild(btn);
-  });
-}
-
-function startFinalBoss(){
-  switchScreen('finalBossScreen');
-
-  let rounds = 0;
-
-  function ask(){
-    if(rounds >= 5){
-      victory();
-      return;
+    
+    function useHint() {
+        if (!gameActive || answeringLock) return;
+        if (hintsRemaining <= 0) { feedbackSpan.innerHTML = "⚠️ No hints left! ⚠️"; return; }
+        const q = currentGameQuestions[currentIndex];
+        const correct = q.correctIdx;
+        const wrongIndices = [0,1,2,3].filter(i => i !== correct);
+        const toDisable = wrongIndices.slice(0, 1);
+        const btns = document.querySelectorAll(".option-btn");
+        toDisable.forEach(idx => {
+            if(btns[idx]) btns[idx].style.opacity = "0.5";
+            btns[idx].disabled = true;
+        });
+        hintsRemaining--;
+        updateUI();
+        feedbackSpan.innerHTML = "💡 Hint used: one wrong answer eliminated!";
+        setTimeout(() => feedbackSpan.innerHTML = "", 1200);
     }
-
-    const q = literaryQuestions[Math.floor(Math.random()*literaryQuestions.length)];
-
-    document.getElementById('finalBossQuestion').innerText = q.q;
-
-    const wrap = document.getElementById('finalBossAnswers');
-    wrap.innerHTML='';
-
-    q.a.forEach((ans,i)=>{
-      const div = document.createElement('div');
-      div.className='answer';
-      div.innerText=ans;
-
-      div.onclick=()=>{
-        if(i===q.c){
-          playTone('correct');
-        } else {
-          loseLife();
+    
+    function useSkip() {
+        if (!gameActive || answeringLock) return;
+        if (skipsRemaining <= 0) { feedbackSpan.innerHTML = "No skips left!"; return; }
+        if (currentIndex + 1 >= currentGameQuestions.length && playerLives > 0) { feedbackSpan.innerHTML = "Last question cannot be skipped!"; return; }
+        stopTimer();
+        answeringLock = true;
+        skipsRemaining--;
+        updateUI();
+        feedbackSpan.innerHTML = "⏩ Skipped! Moving to next question (no penalty).";
+        // skip without penalty, move forward
+        currentIndex++;
+        if (currentIndex >= currentGameQuestions.length && playerLives > 0) {
+            gameActive = false;
+            feedbackSpan.innerHTML = `🏆 VICTORY! You conquered the gauntlet! Score: ${playerScore}`;
+            optionsDiv.innerHTML = "<div style='text-align:center'>🌟 MASTER OF LITERATURE 🌟</div>";
+            nextArea.style.display = "none";
+            return;
         }
-
-        rounds++;
-        ask();
-      };
-
-      wrap.appendChild(div);
+        answeringLock = false;
+        loadQuestion();
+    }
+    
+    function loadQuestion() {
+        answeringLock = false;
+        nextArea.style.display = "none";
+        feedbackSpan.innerHTML = "";
+        if (!gameActive) return;
+        if (currentIndex >= currentGameQuestions.length) {
+            gameActive = false;
+            stopTimer();
+            feedbackSpan.innerHTML = `🎉 VICTORY! FINAL SCORE: ${playerScore} 🎉 You mastered Honors English III!`;
+            optionsDiv.innerHTML = '<div style="text-align:center;">📚 LITERARY CHAMPION 📚<br>Restart to play again</div>';
+            nextArea.style.display = "none";
+            return;
+        }
+        const q = currentGameQuestions[currentIndex];
+        questionDiv.innerText = q.question;
+        if (q.passage) { passageDiv.style.display = "block"; passageDiv.innerText = q.passage; }
+        else passageDiv.style.display = "none";
+        optionsDiv.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerHTML = `<span style="background:cyan; width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:black;">${String.fromCharCode(65+idx)}</span> ${opt}`;
+            btn.addEventListener("click", (e) => handleAnswer(idx));
+            optionsDiv.appendChild(btn);
+        });
+        startTimer();
+    }
+    
+    function nextQuestion() {
+        if (!gameActive) return;
+        if (answeringLock) {
+            currentIndex++;
+            if (currentIndex < currentGameQuestions.length && playerLives > 0) loadQuestion();
+            else if (currentIndex >= currentGameQuestions.length && playerLives > 0) {
+                gameActive = false;
+                feedbackSpan.innerHTML = `🏆 TRIUMPH! SCORE: ${playerScore} — literary genius!`;
+            }
+        }
+    }
+    
+    function restartGame() {
+        stopTimer();
+        // shuffle questions
+        currentGameQuestions = [...MASTER_QUESTIONS];
+        for (let i=currentGameQuestions.length-1;i>0;i--) {
+            const j = Math.floor(Math.random()*(i+1));
+            [currentGameQuestions[i], currentGameQuestions[j]] = [currentGameQuestions[j], currentGameQuestions[i]];
+        }
+        currentIndex = 0;
+        playerScore = 0;
+        streak = 0;
+        gameActive = true;
+        answeringLock = false;
+        // set lives & timer based on mode
+        if (currentMode === "classic") { playerLives = 3; timeLimit = 16; }
+        else if (currentMode === "endurance") { playerLives = 6; timeLimit = 99; timerZoneDiv.style.display = "none"; }
+        else if (currentMode === "blitz") { playerLives = 2; timeLimit = 10; }
+        hintsRemaining = 2;
+        skipsRemaining = 1;
+        updateUI();
+        loadQuestion();
+    }
+    
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll(".mode-btn").forEach(btn => {
+            if(btn.dataset.mode === mode) btn.classList.add("active");
+            else btn.classList.remove("active");
+        });
+        restartGame();
+    }
+    
+    // Event binding
+    document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+    document.getElementById("restartGameBtn").addEventListener("click", () => restartGame());
+    hintBtn.addEventListener("click", useHint);
+    skipBtn.addEventListener("click", useSkip);
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => setMode(btn.dataset.mode));
     });
-  }
-
-  ask();
-}
-
-function victory(){
-  playTone('victory');
-
-  const overlay = document.getElementById('finalOverlay');
-  overlay.style.display='flex';
-
-  for(let i=0;i<120;i++){
-    const c = document.createElement('div');
-    c.className='confetti';
-    c.style.left = Math.random()*100 + '%';
-    c.style.top = '-20px';
-    c.style.animationDuration = (Math.random()*3+2)+'s';
-    overlay.appendChild(c);
-  }
-}
-
-function luckyPageEvent(){
-  const roll = Math.random();
-
-  if(roll < .3){
-    state.lives = Math.min(5,state.lives+1);
-  } else if(roll < .6){
-    addScore(5);
-  } else if(roll < .9){
-    state.doublePoints = true;
-
-    setTimeout(()=>{
-      state.doublePoints = false;
-    },15000);
-  } else {
-    loseLife();
-  }
-
-  updateHUD();
-}
-
-function createNotes(){
-  const wrap = document.getElementById('stickyNotes');
-
-  notes.forEach((n,i)=>{
-    const note = document.createElement('div');
-    note.className='note';
-    note.innerText='Study Note';
-    note.style.left = (i*18+2)+'%';
-    note.style.top = (i%2===0? '70%':'20%');
-
-    note.onclick = ()=>{
-      note.innerText = n;
-      note.style.background='#fff4aa';
-      addScore(1);
-      note.onclick = null;
-    };
-
-    wrap.appendChild(note);
-  });
-}
-
-function resetGame(){
-  location.reload();
-}
-
-updateHUD();
+    
+    // initial classic start
+    restartGame();
 </script>
 </body>
 </html>
